@@ -41,6 +41,7 @@ First follow these steps to clone the student-code repo:
 Cloning is normally **only** done once for each repo that already exists in the cloud. 
 
 1. First click on `Clone Git Repository...`. Click on the green button **Code** and copy-paste the SSH URL. 
+Please note that the image corresponds to the **Lectures** repo, but you should do it for the **Students** repo!
 
 ![clone](./Appendix/images/git_clone_url.png)
 
@@ -64,7 +65,7 @@ As an alternative, you can simply open a Terminal windows in the directory you w
 <div style="page-break-after: always; break-after: page;"></div>
 
 
-## Create your own branch in the student-code repo
+## Create your own branch in the Students repo
 
 Once the `ESMT_2024_DataScraping_Students` folder is open in 
 VS Code create your own branch by following these steps:
