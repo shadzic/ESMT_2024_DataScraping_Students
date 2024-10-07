@@ -1,4 +1,6 @@
 # ESMT_2024_DataScraping_Students
+![tg](./Appendix/images/Taylor_Griffin.png)
+---
 ESMT Students code for Data Scraping course - 2024 edition
 
 This is the repository where each student creates their own branch and pushes (downloads) their homework after each lecture.
