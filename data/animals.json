@@ -1,0 +1,43 @@
+[
+    {
+        "name": "Ace",
+        "animal": "Alpaca",
+        "tricks": [
+            "spit"
+        ],
+        "demographics": {
+            "sex": "male",
+            "age": 2
+        },
+        "owner": "Alice",
+        "city": "Augsburg"
+    },
+    {
+        "name": "Biscuit",
+        "animal": "Beagle",
+        "tricks": [
+            "sit",
+            "hunt"
+        ],
+        "demographics": {
+            "sex": "female",
+            "age": 1
+        },
+        "owner": "Bob",
+        "city": "Berlin"
+    },
+    {
+        "name": "Coco",
+        "animal": "Chinchilla",
+        "tricks": [
+            "explore",
+            "climb"
+        ],
+        "demographics": {
+            "sex": "male",
+            "age": 5
+        },
+        "owner": "Carol",
+        "city": "Cottbus"
+    }
+]
