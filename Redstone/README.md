@@ -1,5 +1,7 @@
 # Grin - E-scooter and E-bike Sharing Service
 
+![Grin Logo](data/grin_logo.png)
+
 ## Introduction
 
 - **Grin**: An e-scooter and e-bike-sharing service located in **Berlin**, tailored for tourists and locals.
