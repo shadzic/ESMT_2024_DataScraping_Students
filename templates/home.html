@@ -66,7 +66,39 @@
         .btn:hover {
             background-color: #0056b3;
         }
+        .chart {
+            margin-top: 40px;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        .dropdown {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .dropdown-content {
+            display: none;
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-top: 10px;
+        }
     </style>
+    <script>
+        function toggleDropdown(id) {
+            var content = document.getElementById(id);
+            if (content.style.display === "none" || content.style.display === "") {
+                content.style.display = "block";
+            } else {
+                content.style.display = "none";
+            }
+        }
+    </script>
 </head>
 <body>
     <h1>TicketMaster Events with Weather Forecast</h1>
@@ -87,10 +119,34 @@
         {% endif %}
     </div>
 
-    <!-- Map Section -->
+    <!-- Dropdown for Event Locations Map -->
     {% if map_file %}
-    <h2>Event Locations Map</h2>
-    <iframe src="/static/{{ map_file }}"></iframe>
+    <div class="dropdown" onclick="toggleDropdown('mapDropdown')">
+        <h2>Event Locations Map</h2>
+    </div>
+    <div id="mapDropdown" class="dropdown-content">
+        <iframe src="/static/{{ map_file }}"></iframe>
+    </div>
+    {% endif %}
+
+    <!-- Dropdown for Event Genres by City Chart -->
+    {% if genre_chart %}
+    <div class="dropdown" onclick="toggleDropdown('genreChartDropdown')">
+        <h2>Event Genres by City</h2>
+    </div>
+    <div id="genreChartDropdown" class="dropdown-content">
+        <img src="{{ url_for('static', filename='event_genre_city_chart.png') }}" alt="Event Genres by City Chart">
+    </div>
+    {% endif %}
+
+    <!-- Dropdown for Bubble Plot: Number of Events by City with Average Temperature -->
+    {% if bubble_chart %}
+    <div class="dropdown" onclick="toggleDropdown('bubbleChartDropdown')">
+        <h2>Number of Events by City with Average Temperature</h2>
+    </div>
+    <div id="bubbleChartDropdown" class="dropdown-content">
+        <img src="{{ url_for('static', filename='bubble_chart.png') }}" alt="Bubble Plot: Events by City and Temperature">
+    </div>
     {% endif %}
 
     <!-- Link to Google Maps Page -->

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Maps API - Venue Info</title>
+    <title>Venue and Route Map</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -47,27 +47,74 @@
             padding: 10px;
             text-align: left;
         }
+        iframe {
+            margin-top: 20px;
+            width: 100%;
+            height: 600px;
+            border: none;
+        }
     </style>
 </head>
 <body>
-    <h1>Google Maps API - Venue Info</h1>
+    <h1>Google Maps API - Venue and Route</h1>
 
+    <h2>Select a City</h2>
     <form method="POST">
         <label for="city">Select City:</label>
         <select id="city" name="city">
             {% for city in cities %}
-            <option value="{{ city }}">{{ city }}</option>
+                <option value="{{ city }}">{{ city }}</option>
             {% endfor %}
         </select>
-        <input type="submit" value="Get Venue Info">
+        <input type="submit" value="Show Venues and Routes">
     </form>
 
-    <!-- Display Venue Data -->
+    <!-- Display the event table -->
     <div class="content">
-        {% if venue_df %}
-        <h2>Venue Information</h2>
-        {{ venue_df|safe }} <!-- Render the processed venue info as HTML table -->
+        <h2>Venues and Details</h2>
+        {% if venues %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Event Name</th>
+                    <th>Venue Name</th>
+                    <th>Event Date</th>
+                    <th>Nearest Airport</th>
+                    <th>Distance to Airport (km)</th>
+                    <th>Time to Airport (min)</th>
+                    <th>Best Restaurant</th>
+                    <th>Restaurant Rating</th>
+                    <th>Best Hotel</th>
+                    <th>Hotel Rating</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for venue in venues %}
+                <tr>
+                    <td>{{ venue['Event Name'] }}</td>
+                    <td>{{ venue['Venue Name'] }}</td>
+                    <td>{{ venue['Event Date'] }}</td>
+                    <td>{{ venue['Nearest Airport'] }}</td>
+                    <td>{{ venue['Distance to Airport (km)'] }}</td>
+                    <td>{{ venue['Time to Airport (min)'] }}</td>
+                    <td>{{ venue['Best Restaurant'] }}</td>
+                    <td>{{ venue['Restaurant Rating'] }}</td>
+                    <td>{{ venue['Best Hotel'] }}</td>
+                    <td>{{ venue['Hotel Rating'] }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p>No venues found for the selected city.</p>
         {% endif %}
     </div>
+
+    <!-- Display the combined route map if available -->
+    
+    {% if map_file %}
+        <h2>Combined Route Map for City</h2>
+        <iframe src="{{ url_for('static', filename=map_file) }}" width="100%" height="600"></iframe>
+    {% endif %}
 </body>
 </html>

@@ -6,6 +6,11 @@ import time
 from datetime import datetime, timedelta
 import ticketpy
 import requests
+import matplotlib
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+matplotlib.use('Agg')
 
 app = Flask(__name__)
 
@@ -20,6 +25,52 @@ tm_client = ticketpy.ApiClient('')
 
 # OpenWeatherMap API setup
 weather_url = "http://api.openweathermap.org/data/2.5/forecast"
+
+# Create Event Genre Chart for Homepage
+def create_event_genre_city_chart(df):
+    genre_city = df.groupby(['Venue City', 'Event Genre']).size().unstack(fill_value=0)
+    
+    # Plot and save the figure as an image
+    fig, ax = plt.subplots(figsize=(12, 6))
+    genre_city.plot(kind='bar', stacked=True, ax=ax, colormap='viridis')
+    
+    ax.set_title('Event Genres by City')
+    ax.set_xlabel('City')
+    ax.set_ylabel('Number of Events')
+    plt.xticks(rotation=45)
+    ax.legend(title='Event Genre')
+    plt.tight_layout()
+    
+    # Save the plot as an image
+    chart_path = 'static/event_genre_city_chart.png'
+    plt.savefig(chart_path)
+    plt.close()
+    return chart_path
+
+# Create Temperature / Events Chart
+def create_bubble_plot(df):
+    df['Temperature'] = df['Weather Forecast'].str.extract(r'(\d+\.\d+)').astype(float)
+    
+    # Count events per city and merge with temperature data
+    events_count = df['Venue City'].value_counts().reset_index()
+    events_count.columns = ['Venue City', 'Event Count']
+    avg_temp = df.groupby('Venue City')['Temperature'].mean().reset_index()
+    bubble_data = pd.merge(events_count, avg_temp, on='Venue City')
+
+    # Create and save the plot
+    fig, ax = plt.subplots(figsize=(12, 8))
+    sns.scatterplot(data=bubble_data, x='Venue City', y='Temperature', size='Event Count', sizes=(100, 1000), ax=ax, legend=False, alpha=0.7)
+    ax.set_title('Number of Events by City with Average Temperature')
+    ax.set_xlabel('City')
+    ax.set_ylabel('Temperature (°C)')
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+
+    # Save the plot as an image
+    bubble_chart_path = 'static/bubble_chart.png'
+    plt.savefig(bubble_chart_path)
+    plt.close()
+    return bubble_chart_path
 
 # Function to get TicketMaster data
 def get_ticketmaster_data(start_date, end_date):
@@ -128,9 +179,19 @@ def home():
         germany_map = generate_map(df_sorted_tmaster)
         germany_map.save('static/germany_events_map.html')
 
-        return render_template('home.html', df=df_sorted_tmaster.to_html(), map_file="germany_events_map.html")
+        genre_city_chart_path = create_event_genre_city_chart(df_sorted_tmaster)
+        bubble_chart_path = create_bubble_plot(df_sorted_tmaster)
+
+        return render_template(
+            'home.html',
+            df=df_sorted_tmaster.to_html(),
+            map_file="germany_events_map.html",
+            genre_chart=genre_city_chart_path,
+            bubble_chart=bubble_chart_path
+        )
     return render_template('home.html')
 
+# Google Maps API page
 # Google Maps API page
 @app.route('/googlemaps', methods=['GET', 'POST'])
 def google_maps_page():
@@ -154,6 +215,7 @@ def google_maps_page():
         df_city['Restaurant Rating'] = None
         df_city['Best Hotel'] = None
         df_city['Hotel Rating'] = None
+        df_city['Route Map'] = None
 
         # Process each venue in the selected city
         for index, row in df_city.iterrows():
@@ -169,11 +231,49 @@ def google_maps_page():
             df_city.at[index, 'Best Hotel'] = venue_info['Best Hotel']
             df_city.at[index, 'Hotel Rating'] = venue_info['Hotel Rating']
 
-        # Render the updated dataframe to the HTML page
-        return render_template('googlemaps.html', cities=cities, venue_df=df_city.to_html())
+            # Generate a Folium map with the route for this venue
+            if venue_info['Route Points']:
+                airport_coords = (venue_info['Route Points'][0][0], venue_info['Route Points'][0][1])
+                venue_coords = (row['Venue Latitude'], row['Venue Longitude'])
+                route_map_path = generate_route_map(venue_info['Route Points'], airport_coords, venue_coords)
+                df_city.at[index, 'Route Map'] = route_map_path
+
+        # Render the updated dataframe to the HTML page and map
+        return render_template('googlemaps.html', cities=cities, venue_df=df_city.to_html(), map_file=route_map_path)
 
     return render_template('googlemaps.html', cities=cities)
 # Incorporate Visualization about average time to airport
+
+def get_osrm_route(airport_coords, venue_coords):
+    """Calculate a route between two coordinates using OSRM."""
+    osrm_url = f"http://router.project-osrm.org/route/v1/driving/{airport_coords[1]},{airport_coords[0]};{venue_coords[1]},{venue_coords[0]}?overview=full&geometries=geojson"
+
+    response = requests.get(osrm_url)
+    if response.status_code == 200:
+        data = response.json()
+        if 'routes' in data and len(data['routes']) > 0:
+            route_geometry = data['routes'][0]['geometry']  # GeoJSON route line
+            return route_geometry
+    return None
+
+# Function to generate Folium map with a route between airport and venue
+def generate_route_map_osm(airport_coords, venue_coords, route_geometry):
+    """Generate a Folium map with the route from airport to venue."""
+    # Initialize map centered around the airport
+    route_map = folium.Map(location=airport_coords, zoom_start=12)
+
+    # Add airport and venue markers
+    folium.Marker(location=airport_coords, popup="Nearest Airport", icon=folium.Icon(color="blue")).add_to(route_map)
+    folium.Marker(location=venue_coords, popup="Event Venue", icon=folium.Icon(color="red")).add_to(route_map)
+
+    # Add the route as a polyline
+    if route_geometry:
+        folium.PolyLine(polyline.decode(route_geometry), color="green", weight=5, opacity=0.8).add_to(route_map)
+
+    # Save the map as an HTML file
+    map_path = 'static/route_map_osm.html'
+    route_map.save(map_path)
+    return map_path
 
 # Function to process a single venue using Google Maps API
 def process_single_venue(row):
@@ -190,8 +290,18 @@ def process_single_venue(row):
         airport_distance_km, airport_duration_minutes = calculate_distance_matrix(
             venue_coords, airport_coords, mode='driving', departure_time=departure_time
         )
+
+        # Fetch the directions route between the airport and the venue
+        directions_result = gmaps.directions(airport_coords, venue_coords, mode="driving", departure_time=departure_time)
+        if directions_result and 'legs' in directions_result[0]:
+            route = directions_result[0]['legs'][0]['steps']
+            # Extracting route points
+            route_points = [(step['start_location']['lat'], step['start_location']['lng']) for step in route]
+            route_points.append((venue_lat, venue_lon))  # Adding final point (venue)
+        else:
+            route_points = []
     else:
-        airport_distance_km, airport_duration_minutes = None, None
+        airport_distance_km, airport_duration_minutes, route_points = None, None, []
 
     restaurant_name, restaurant_lat, restaurant_lon, restaurant_rating = find_best_reviewed_place(venue_lat, venue_lon, 'restaurant')
     hotel_name, hotel_lat, hotel_lon, hotel_rating = find_best_reviewed_place(venue_lat, venue_lon, 'lodging')
@@ -203,7 +313,8 @@ def process_single_venue(row):
         'Best Restaurant': restaurant_name,
         'Restaurant Rating': restaurant_rating,
         'Best Hotel': hotel_name,
-        'Hotel Rating': hotel_rating
+        'Hotel Rating': hotel_rating,
+        'Route Points': route_points  # Return the route points for Folium
     }
 
 # Function to find the nearest commercial airport

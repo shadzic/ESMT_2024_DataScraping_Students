@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    
+        <script>
+            L_NO_TOUCH = false;
+            L_DISABLE_3D = false;
+        </script>
+    
+    <style>html, body {width: 100%;height: 100%;margin: 0;padding: 0;}</style>
+    <style>#map {position:absolute;top:0;bottom:0;right:0;left:0;}</style>
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_e08a7985be3ed3bcc38d55ce8b5dc87b {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_e08a7985be3ed3bcc38d55ce8b5dc87b" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_e08a7985be3ed3bcc38d55ce8b5dc87b = L.map(
+                "map_e08a7985be3ed3bcc38d55ce8b5dc87b",
+                {
+                    center: [52.3660521, 13.5085704],
+                    crs: L.CRS.EPSG3857,
+                    zoom: 12,
+                    zoomControl: true,
+                    preferCanvas: false,
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_4b57ea5a86d71aa69f81a97ad48665dd = L.tileLayer(
+                "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                {"attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors", "detectRetina": false, "maxNativeZoom": 19, "maxZoom": 19, "minZoom": 0, "noWrap": false, "opacity": 1, "subdomains": "abc", "tms": false}
+            );
+        
+    
+            tile_layer_4b57ea5a86d71aa69f81a97ad48665dd.addTo(map_e08a7985be3ed3bcc38d55ce8b5dc87b);
+        
+    
+            var marker_408130eb88c3b7dd2d8178e3e99160f0 = L.marker(
+                [52.3660521, 13.5085704],
+                {}
+            ).addTo(map_e08a7985be3ed3bcc38d55ce8b5dc87b);
+        
+    
+            var icon_dff757a8d02217da97234ab59ea27b06 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "blue", "prefix": "glyphicon"}
+            );
+            marker_408130eb88c3b7dd2d8178e3e99160f0.setIcon(icon_dff757a8d02217da97234ab59ea27b06);
+        
+    
+        var popup_afec292ed92b5724b673d7d824761995 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_59ab7b483604825977b0876dca17c939 = $(`<div id="html_59ab7b483604825977b0876dca17c939" style="width: 100.0%; height: 100.0%;">Nearest Airport</div>`)[0];
+                popup_afec292ed92b5724b673d7d824761995.setContent(html_59ab7b483604825977b0876dca17c939);
+            
+        
+
+        marker_408130eb88c3b7dd2d8178e3e99160f0.bindPopup(popup_afec292ed92b5724b673d7d824761995)
+        ;
+
+        
+    
+    
+            var marker_aab7c3e5108d5a72ef86ed0984b2fae2 = L.marker(
+                [52.46438, 13.43338],
+                {}
+            ).addTo(map_e08a7985be3ed3bcc38d55ce8b5dc87b);
+        
+    
+            var icon_4806eef0b360909210e97cb1ef646b25 = L.AwesomeMarkers.icon(
+                {"extraClasses": "fa-rotate-0", "icon": "info-sign", "iconColor": "white", "markerColor": "red", "prefix": "glyphicon"}
+            );
+            marker_aab7c3e5108d5a72ef86ed0984b2fae2.setIcon(icon_4806eef0b360909210e97cb1ef646b25);
+        
+    
+        var popup_5bfaa2d1933d714af4c032e4bf1b6cd4 = L.popup({"maxWidth": "100%"});
+
+        
+            
+                var html_d8a943b910c1acfa7402fbfa4d5f4827 = $(`<div id="html_d8a943b910c1acfa7402fbfa4d5f4827" style="width: 100.0%; height: 100.0%;">Event Venue</div>`)[0];
+                popup_5bfaa2d1933d714af4c032e4bf1b6cd4.setContent(html_d8a943b910c1acfa7402fbfa4d5f4827);
+            
+        
+
+        marker_aab7c3e5108d5a72ef86ed0984b2fae2.bindPopup(popup_5bfaa2d1933d714af4c032e4bf1b6cd4)
+        ;
+
+        
+    
+    
+            var poly_line_9c1401a2667f1aca6d5d4e8b3f5eb2dc = L.polyline(
+                [[52.3660521, 13.5085704], [52.3630085, 13.5104961], [52.3627931, 13.5107968], [52.3627219, 13.5119585], [52.3639099, 13.5166732], [52.3740159, 13.5480894], [52.4629728, 13.4546244], [52.46310459999999, 13.4447671], [52.4636899, 13.4442834], [52.46507709999999, 13.4428125], [52.4640301, 13.4333333], [52.46438, 13.43338]],
+                {"bubblingMouseEvents": true, "color": "green", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "green", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.8, "smoothFactor": 1.0, "stroke": true, "weight": 5}
+            ).addTo(map_e08a7985be3ed3bcc38d55ce8b5dc87b);
+        
+</script>
+</html>
