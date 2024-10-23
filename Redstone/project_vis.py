@@ -6,8 +6,7 @@ import requests
 import streamlit as st
 from dotenv import load_dotenv
 from geopy.distance import geodesic
-from geopy.geocoders import Nominatim
-from streamlit_folium import folium_static
+from streamlit_folium import st_folium
 
 # Load the final dataset
 df = pd.read_csv(
@@ -15,16 +14,17 @@ df = pd.read_csv(
 )
 
 # Load environment variables from .env file
-load_dotenv(dotenv_path="./data/.env")
+load_dotenv(
+    dotenv_path="/Users/matiascam/Documents/Data_Scraping/Redstone/data/.env"
+)
 
-# load Google API
+# Load Google API key from environment variables
 google_api_key = os.getenv("GOOGLE_API_KEY")
 
 
 # Function to create a map with vehicle locations and tourist places
 def create_map(df, origin_coords=None, destination_coords=None):
-    # Center the map on Berlin
-    map_center = [52.5200, 13.4050]
+    map_center = [52.5200, 13.4050]  # Center the map on Berlin
     map_berlin = folium.Map(location=map_center, zoom_start=12)
 
     # Plot available vehicles on the map
@@ -43,13 +43,11 @@ def create_map(df, origin_coords=None, destination_coords=None):
     # Add the origin and destination points if provided
     if origin_coords:
         folium.Marker(
-            (origin_coords.latitude, origin_coords.longitude),
-            popup="Origin",
-            icon=folium.Icon(color="green"),
+            origin_coords, popup="Origin", icon=folium.Icon(color="green")
         ).add_to(map_berlin)
     if destination_coords:
         folium.Marker(
-            (destination_coords.latitude, destination_coords.longitude),
+            destination_coords,
             popup="Destination",
             icon=folium.Icon(color="purple"),
         ).add_to(map_berlin)
@@ -61,10 +59,8 @@ def create_map(df, origin_coords=None, destination_coords=None):
 def get_route_from_google(origin_coords, destination_coords, google_api_key):
     directions_url = "https://maps.googleapis.com/maps/api/directions/json"
     params = {
-        "origin": f"{origin_coords.latitude},{origin_coords.longitude}",
-        "destination": (
-            f"{destination_coords.latitude},{destination_coords.longitude}"
-        ),
+        "origin": f"{origin_coords[0]},{origin_coords[1]}",
+        "destination": f"{destination_coords[0]},{destination_coords[1]}",
         "mode": "bicycling",
         "key": google_api_key,
     }
@@ -75,6 +71,22 @@ def get_route_from_google(origin_coords, destination_coords, google_api_key):
         return route
     else:
         st.error("Error fetching directions from Google API.")
+        return None
+
+
+# Function to get coordinates using Google Geocoding API
+def get_coordinates_from_google(address, google_api_key):
+    geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?address={address}&key={google_api_key}"
+    response = requests.get(geocode_url)
+    geocode_data = response.json()
+    if geocode_data["status"] == "OK":
+        location = geocode_data["results"][0]["geometry"]["location"]
+        return (location["lat"], location["lng"])
+    else:
+        st.error(
+            "Error fetching coordinates from Google API:"
+            f" {geocode_data['status']}"
+        )
         return None
 
 
@@ -92,6 +104,27 @@ def add_route_to_map(map_berlin, route):
             weight=2.5,
             opacity=1,
         ).add_to(map_berlin)
+
+
+# Add tourist places along the route
+def add_places_along_route(map_berlin, route, df):
+    for idx, row in df.iterrows():
+        for step in route["steps"]:
+            start_coords = (
+                step["start_location"]["lat"],
+                step["start_location"]["lng"],
+            )
+            place_coords = (row["latitude"], row["longitude"])
+            distance = geodesic(start_coords, place_coords).meters
+            if distance < 500:  # 500 meters from route
+                folium.Marker(
+                    place_coords,
+                    popup=(
+                        "Place:"
+                        f" {row['nearest_place_name']} ({row['place_category']})"
+                    ),
+                    icon=folium.Icon(color="green"),
+                ).add_to(map_berlin)
 
 
 # Streamlit App UI
@@ -114,11 +147,16 @@ st.write(f"Precipitation: {df['prcp'].iloc[0]} mm")
 st.write(f"Wind Speed: {df['wspd'].iloc[0]} km/h")
 st.write(f"Sunshine Duration: {df['tsun'].iloc[0]} minutes")
 
-# Geocoding: Convert user inputs (addresses) to coordinates
-geolocator = Nominatim(user_agent="geoapiExercises")
-origin_coords = geolocator.geocode(origin_input) if origin_input else None
+# Get coordinates using Google Geocoding API
+origin_coords = (
+    get_coordinates_from_google(origin_input, google_api_key)
+    if origin_input
+    else None
+)
 destination_coords = (
-    geolocator.geocode(destination_input) if destination_input else None
+    get_coordinates_from_google(destination_input, google_api_key)
+    if destination_input
+    else None
 )
 
 # Create and display the map with available vehicles and tourist places
@@ -132,18 +170,14 @@ if origin_coords and destination_coords:
 
     # Create the map and add the route
     map_berlin = create_map(
-        df,
-        origin_coords=(origin_coords.latitude, origin_coords.longitude),
-        destination_coords=(
-            destination_coords.latitude,
-            destination_coords.longitude,
-        ),
+        df, origin_coords=origin_coords, destination_coords=destination_coords
     )
 
     if route:
         add_route_to_map(map_berlin, route)
+        add_places_along_route(map_berlin, route, df)
 
-    folium_static(map_berlin)
+    st_folium(map_berlin, width=700, height=500)
 else:
     st.warning("Please enter valid origin and destination locations.")
 
@@ -151,4 +185,4 @@ else:
 if not origin_input or not destination_input:
     st.subheader("Available Vehicles and Tourist Places")
     map_berlin = create_map(df)
-    folium_static(map_berlin)
+    st_folium(map_berlin, width=700, height=500)
