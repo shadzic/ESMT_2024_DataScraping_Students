@@ -1,6 +1,6 @@
 # Grin - E-scooter and E-bike Sharing Service
 
-![Grin Logo](data/grin_logo.png)
+<img src="data/grin_logo.png" alt="Grin Logo" width="300"/>
 
 ## Introduction
 
